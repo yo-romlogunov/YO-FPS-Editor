@@ -1,18 +1,47 @@
 /********************************************************************
 romlogunov - t.me/romlogunov_hub
 ********************************************************************/
+// Полифилл для Array.prototype.indexOf
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(searchElement, fromIndex) {
+        var k;
+        if (this == null) {
+            throw new TypeError('"this" is null or not defined');
+        }
+        var O = Object(this);
+        var len = O.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = fromIndex | 0;
+        k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+        while (k < len) {
+            if (k in O && O[k] === searchElement) {
+                return k;
+            }
+            k++;
+        }
+        return -1;
+    };
+}
 
 function buildUI(thisObj) {
     // Определяем, запускается ли скрипт как панель или как окно
     var pal = (thisObj instanceof Panel)
         ? thisObj
-        : new Window("palette", "YO FPS Editor 2.7", undefined, { resizeable: true });
+        : new Window("palette", "YO FPS Editor 2.7", undefined, { resizeable: false }); // Изменено: resizeable установлено в false
     
     pal.text = "YO FPS Editor 2.7";
     pal.orientation = "column";
     pal.alignChildren = ["fill","top"];
     pal.spacing = 15; 
     pal.margins = 10; 
+
+    // Установка фиксированного размера панели
+    pal.preferredSize = [500, 600]; // Измените значения по необходимости
+    pal.minimumSize = pal.preferredSize; // Изменено: Минимальный размер равен предпочтительному
+    pal.maximumSize = pal.preferredSize; // Изменено: Максимальный размер равен предпочтительному
+    
     // -------------------------------------------------------------------------
     // ABOUT_GROUP
     // ===========
@@ -64,29 +93,35 @@ function buildUI(thisObj) {
         statictext_current.text = "Current Frame rate:"; 
         statictext_current.helpTip = "Choose the current framerate of your item.";
 
-    var framerateOptions = ["8", "12", "15", "23.976", "24", "25", "30", "50", "60", "120", "240"];
-    var dropdown_current = group_frameRates.add("dropdownlist", undefined, undefined, {name: "dropdown_current"});
-    for (var j = 0; j < framerateOptions.length; j++){
-        dropdown_current.add("item", framerateOptions[j]);
-    }
+    // Объявление массива framerateOptions
+var framerateOptions = ["8", "12", "15", "23.976", "24", "25", "30", "50", "60", "120", "240"];
 
-    var idx24 = framerateOptions.indexOf("24");
-    dropdown_current.selection = (idx24 !== -1) ? idx24 : 0;
-    dropdown_current.preferredSize.width = 80; 
+// Создание выпадающего списка для текущих кадровых частот
+var dropdown_current = group_frameRates.add("dropdownlist", undefined, undefined, {name: "dropdown_current"});
+for (var j = 0; j < framerateOptions.length; j++){
+    dropdown_current.add("item", framerateOptions[j]);
+}
 
-    var divider1 = group_frameRates.add("panel", undefined, undefined, {name: "divider1"}); 
-        divider1.alignment = "fill"; 
+var idx24 = framerateOptions.indexOf("24");
+dropdown_current.selection = (idx24 !== -1) ? idx24 : 0;
+dropdown_current.preferredSize.width = 80; 
 
-    var statictext_new = group_frameRates.add("statictext", undefined, undefined, {name: "statictext_new"}); 
-        statictext_new.text = "New Frame rate:"; 
+// Разделитель
+var divider1 = group_frameRates.add("panel", undefined, undefined, {name: "divider1"}); 
+divider1.alignment = "fill"; 
 
-    var dropdown_new = group_frameRates.add("dropdownlist", undefined, undefined, {name: "dropdown_new"});
-    for (var i = 0; i < framerateOptions.length; i++){
-        dropdown_new.add("item", framerateOptions[i]);
-    }
-    var idx50 = framerateOptions.indexOf("50");
-    dropdown_new.selection = (idx50 !== -1) ? idx50 : 0;
-    dropdown_new.preferredSize.width = 80; 
+// Статический текст для новой кадровой частоты
+var statictext_new = group_frameRates.add("statictext", undefined, undefined, {name: "statictext_new"}); 
+statictext_new.text = "New Frame rate:"; 
+
+// Создание выпадающего списка для новой кадровой частоты
+var dropdown_new = group_frameRates.add("dropdownlist", undefined, undefined, {name: "dropdown_new"});
+for (var i = 0; i < framerateOptions.length; i++){
+    dropdown_new.add("item", framerateOptions[i]);
+}
+var idx50 = framerateOptions.indexOf("50");
+dropdown_new.selection = (idx50 !== -1) ? idx50 : 0;
+dropdown_new.preferredSize.width = 80; 
     
     // -------------------------------------------------------------------------
     // PANEL2: Duplicate Options
